@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공공조달관리사 제1회차 모의고사 (Q1~Q25)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100 min-h-screen flex flex-col justify-between font-sans text-gray-800">
+
+    <!-- Header -->
+    <header class="w-full bg-white/85 backdrop-blur-md shadow-sm py-4 px-6 sticky top-0 z-50 flex justify-between items-center">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+            <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md">
+                <i class="fa-solid fa-file-contract text-xl"></i>
+            </div>
+            <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">공공조달 1회차 (Q1~Q25)</span>
+        </div>
+        <div id="stats-badge" class="hidden items-center space-x-4 bg-gray-100 px-4 py-1.5 rounded-full text-sm font-medium">
+            <span><i class="fa-regular fa-clock text-indigo-600 mr-1.5"></i><span id="timer">00:00</span></span>
+            <span class="text-gray-300">|</span>
+            <span><i class="fa-solid fa-fire text-orange-500 mr-1.5"></i>연속 <span id="streak">0</span></span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-8 flex-grow flex items-center justify-center max-w-2xl">
+        
+        <!-- 1. Home Screen -->
+        <div id="screen-home" class="w-full bg-white rounded-3xl shadow-xl p-8 text-center transition-all duration-300 border border-indigo-50">
+            <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-3xl mb-6 shadow-inner">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-3">제1회차: 공공조달 개요 및 제도</h1>
+            <p class="text-gray-500 mb-6 max-w-md mx-auto">1장(개요) ~ 3장(전자조달시스템)에 해당하는 25문항 실전 모의고사입니다. 모든 문제에 정답과 상세 해설이 포함되어 있습니다.</p>
+            
+            <div class="bg-indigo-50/60 rounded-xl p-4 mb-6 text-sm text-left max-w-md mx-auto border border-indigo-100 text-indigo-900">
+                <p class="font-semibold mb-1"><i class="fa-solid fa-circle-info mr-1 text-indigo-600"></i> 시험 안내</p>
+                <ul class="list-disc list-inside space-y-1 text-xs text-indigo-800">
+                    <li>총 25문항 (4지선다형 객관식)</li>
+                    <li>문항당 4점 (총 100점 만점)</li>
+                    <li>선택 즉시 정답 및 상세 해설 확인 가능</li>
+                </ul>
+            </div>
+
+            <button id="start-btn" type="button" class="w-full max-w-md py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 hover:opacity-95 transform active:scale-95 transition-all text-lg cursor-pointer">
+                1회차 25문제 시작하기 <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- 2. Quiz Screen -->
+        <div id="screen-quiz" class="w-full bg-white rounded-3xl shadow-xl p-6 md:p-8 hidden border border-indigo-50">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-tracker" class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Question 1 of 25</span>
+                    <span id="score-tracker" class="text-xs font-semibold text-gray-400">점수: 0</span>
+                </div>
+                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: 4%"></div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 id="question-text" class="text-lg md:text-xl font-bold text-gray-900 leading-snug">질문이 여기에 표시됩니다.</h2>
+            </div>
+
+            <div id="options-container" class="space-y-3 mb-6"></div>
+
+            <div id="rationale-box" class="hidden mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-200">
+                <div class="flex items-start space-x-3">
+                    <div id="rationale-icon" class="mt-0.5 text-lg"></div>
+                    <div>
+                        <h4 id="rationale-title" class="font-bold text-sm mb-1">해설</h4>
+                        <p id="rationale-text" class="text-sm text-gray-600 leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="next-btn" type="button" class="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl shadow-md hover:bg-gray-800 transition-all hidden cursor-pointer">
+                다음 문제 <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- 3. Result Screen -->
+        <div id="screen-result" class="w-full bg-white rounded-3xl shadow-xl p-8 text-center hidden border border-indigo-50">
+            <div class="w-24 h-24 bg-amber-50 text-amber-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-6 shadow-inner">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">1회차 완료!</h2>
+            <p class="text-gray-500 mb-6">25문제를 모두 풀었습니다. 최종 성적을 확인하세요.</p>
+
+            <div class="bg-indigo-50/50 rounded-2xl p-6 mb-8 border border-indigo-100/50 max-w-sm mx-auto">
+                <div class="text-sm font-semibold text-indigo-600 mb-1">최종 점수</div>
+                <div id="final-score" class="text-5xl font-black text-indigo-900 mb-2">100<span class="text-2xl text-indigo-400">점</span></div>
+                <div id="result-message" class="text-sm font-medium text-gray-600">완벽해요! 아주 훌륭한 실력입니다.</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto mb-8">
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                    <div class="text-xs text-gray-400 font-medium">소요 시간</div>
+                    <div id="final-time" class="text-lg font-bold text-gray-800">00:00</div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                    <div class="text-xs text-gray-400 font-medium">최대 연속 정답</div>
+                    <div id="final-streak" class="text-lg font-bold text-gray-800">0</div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 max-w-sm mx-auto">
+                <button onclick="restartQuiz()" type="button" class="flex-1 py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all cursor-pointer">
+                    <i class="fa-solid fa-rotate-right mr-1.5"></i> 다시 풀기
+                </button>
+                <button onclick="shareResult()" type="button" class="flex-1 py-3.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all cursor-pointer">
+                    <i class="fa-solid fa-share-nodes mr-1.5"></i> 결과 복사
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-4 text-center text-xs text-gray-400">
+        &copy; 2026 공공조달관리사 실전 모의고사 1회차. All rights reserved.
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                question: "Q1. 다음 중 공공조달(Public Procurement)의 정의에 대한 설명으로 가장 적절하지 않은 것은?",
+                options: [
+                    { text: "협의의 관점에서 공공조달은 공공재정을 활용하여 필요한 물품, 용역, 공사를 구매하는 일련의 활동을 의미한다.", isCorrect: false },
+                    { text: "광의의 관점에서는 공공서비스의 실행과 관리에 필요한 조달을 통해 정부정책과 제도의 성과를 지원하는 활동을 포함한다.", isCorrect: false },
+                    { text: "민간구매와 달리 공공조달은 단순히 계약에 기반한 구매행위를 넘어 사회적, 환경적, 경제적 가치 등 유관 정책 의제를 필수로 고려해야 한다.", isCorrect: false },
+                    { text: "공공조달의 본질은 사적 자치의 원칙에 따른 이익 극대화에 있으므로, 정책적 도구로서의 기능은 부차적인 수준에 머무른다.", isCorrect: true }
+                ],
+                rationale: "공공조달은 사적 자치에 의한 이익 극대화를 목적으로 하는 민간구매와 다릅니다. 국민의 세금을 재원으로 하여 공익적 목적(공공서비스 제공) 및 정부의 다양한 정책적 의제(전략적 조달)를 수행하는 도구로서 현대적 정의에서 매우 중요한 역할을 담당합니다."
+            },
+            {
+                question: "Q2. 다음 중 공공서비스 실행을 위한 공공조달의 역할과 예시로 가장 올바르게 짝지어진 것은?",
+                options: [
+                    { text: "바닥신호등 수요 제기 - 조달청 중앙조달 요청", isCorrect: false },
+                    { text: "사전규격공개 및 입찰공고 - 최적 공급자 선정", isCorrect: false },
+                    { text: "낙찰자 선정 - 경쟁을 통한 비용 대비 가치(VFM) 확보", isCorrect: true },
+                    { text: "계약 완료 - 대기지급 및 민간자원 회수", isCorrect: false }
+                ],
+                rationale: "교재의 표 1에 따르면 입찰 및 낙찰 단계의 의의는 '경쟁을 통해 가격 대비 가치(Value For Money)를 보유한 최적 공급자 선정'입니다. ①은 사업부서의 역할, ②는 발주/계약부서의 역할입니다."
+            },
+            {
+                question: "Q3. 공공조달의 역사적 연원에 대한 설명 중 가장 사실과 다른 것은?",
+                options: [
+                    { text: "기원전(BC) 2700년경 이집트 피라미드 건설 당시 자재 조달과 인부 관리에 관한 복잡한 관리 프로세스가 존재했다.", isCorrect: false },
+                    { text: "프랑스 나폴레옹 시대인 1806년에 제정된 칙령을 통해 공개적 광고, 경쟁입찰, 운영 통제의 3대 기본원칙이 확립되었다.", isCorrect: false },
+                    { text: "조선시대 대동법 시행을 계기로 왕실과 정부 관서에 필요한 물자를 조달하던 '공인(貢人)'이 납품 역할을 수행했다.", isCorrect: false },
+                    { text: "미국의 1933년 미국산 제품 구매법(Buy American Act)은 전후 복구 시기 외국 무기 제조업체에 전적으로 의존하기 위해 제정되었다.", isCorrect: true }
+                ],
+                rationale: "미국의 「Buy American Act(미국산 제품 구매법)」은 연방기관이 국내 상품과 서비스를 우선 구매하도록 의무화하여 국내 산업을 활성화하고 실업률을 낮추기 위해 제정되었습니다."
+            },
+            {
+                question: "Q4. 다음 중 OECD 국가들의 공공조달 통계 및 중요성에 관한 설명으로 옳은 것은?",
+                options: [
+                    { text: "OECD 회원국 기준, 공공조달 지출 규모는 국가 GDP의 약 3~5% 수준에 불과하다.", isCorrect: false },
+                    { text: "OECD 회원국의 정부 총지출 중 공공조달 지출 비중은 약 30% (2023년 기준)를 차지한다.", isCorrect: true },
+                    { text: "공공조달 지출 부문 중 가장 큰 비중을 차지하는 분야는 국방 및 안보 분야이다.", isCorrect: false },
+                    { text: "전체 공공조달 지출 중 지방정부에 비해 중앙정부의 지출 비중이 2배 이상 높다.", isCorrect: false }
+                ],
+                rationale: "OECD 국가의 정부 총지출 중 공공조달 비중은 약 30%에 달하며 대단히 중요합니다. GDP 대비 비중은 약 12% 내외이고, 부문별 비중이 가장 높은 곳은 보건(Health) 분야이며, 중앙정부(37.5%)보다 지방정부(62.5%)의 조달 지출 비중이 더 높습니다."
+            },
+            {
+                question: "Q5. 공공조달의 중요성을 설명하는 네 가지 측면과 거리가 먼 것은?",
+                options: [
+                    { text: "정부의 재정 운영 효율성에 결정적인 영향을 미친다.", isCorrect: false },
+                    { text: "국민의 삶의 질과 복지에 직접적인 영향을 미친다.", isCorrect: false },
+                    { text: "거래 규모가 크고 복잡한 가치사슬로 얽혀 있어 고위험 영역에 속한다.", isCorrect: false },
+                    { text: "단순 상거래로서 단기적인 이윤 극대화 효과를 측정하기 용이하다.", isCorrect: true }
+                ],
+                rationale: "공공조달은 공익성과 정책 지원 역할을 지니므로 단기 이윤 극대화와는 거리가 멀며, 장기적이고 전략적인 가치를 우선시합니다."
+            },
+            {
+                question: "Q6. 우리나라 공공조달 지출 규모에 관한 설명 중 가장 올바른 것은?",
+                options: [
+                    { text: "우리나라의 공공조달 지출 규모는 실질 국내총생산(GDP) 대비 50%가 넘는다.", isCorrect: false },
+                    { text: "2024년 기준 국내 공공조달 지출 규모는 약 225.1조 원으로 GDP의 약 9.8% 수준이다.", isCorrect: true },
+                    { text: "국가 명목 GDP 성장에서 공공조달이 차지하는 비중은 매년 일정하게 1% 미만으로 유지된다.", isCorrect: false },
+                    { text: "경제위기 상황에서는 공공조달의 경기 부양 효과가 전혀 발생하지 않는다.", isCorrect: false }
+                ],
+                rationale: "2024년 기준 국내 공공조달 지출 규모는 약 225.1조 원에 이르며, 이는 GDP의 약 9.8% 수준입니다. 경제위기 시에는 경제성장률의 최대 약 50%를 견인하는 역할을 수행하기도 합니다."
+            },
+            {
+                question: "Q7. 공공조달의 운영적 측면의 목표 중 '모든 조달 참여자에게 차별 없이 공정하고 자유로운 참여를 보장하는 것'에 해당하는 가치는?",
+                options: [
+                    { text: "공정성 (Fairness)", isCorrect: true },
+                    { text: "투명성 (Transparency)", isCorrect: false },
+                    { text: "책임성 (Accountability)", isCorrect: false },
+                    { text: "경쟁성 (Competition)", isCorrect: false }
+                ],
+                rationale: "참여자에게 차별을 두지 않고 동등한 참여 기회를 부여하는 것은 '공정성'에 해당합니다."
+            },
+            {
+                question: "Q8. 공공조달 성숙도 발전단계(Harland et al., 2013) 중 5단계에 대한 설명으로 옳은 것은?",
+                options: [
+                    { text: "단순히 법령과 규정을 준수하는 단계이다.", isCorrect: false },
+                    { text: "조달 대상물의 적합한 공급자만을 확보하는 기초 단계이다.", isCorrect: false },
+                    { text: "비용 대비 가치(Value for Money)를 추구하는 단계로, 운영적 효율성과 정책적 효과성의 전환점이다.", isCorrect: true },
+                    { text: "국가의 광범위한 정부 정책의 본질적 성과를 구현 및 전달하는 최종 단계이다.", isCorrect: false }
+                ],
+                rationale: "5단계는 '비용 대비 가치(VFM) 추구' 단계로, 전통적인 운영 효율성에서 전략적 정책 성과로 넘어가는 핵심 전환 단계에 해당합니다. (6~7단계가 정책 지원 및 성과 구현 단계임)"
+            },
+            {
+                question: "Q9. 공공조달의 '수요자' 범위에 포함되지 않는 기관은?",
+                options: [
+                    { text: "국가기관 및 지방자치단체", isCorrect: false },
+                    { text: "공기업 및 준정부기관", isCorrect: false },
+                    { text: "순수한 민간재원만으로 사업을 영위하는 영리 목적의 민간 대기업", isCorrect: true },
+                    { text: "공적 목적으로 자금을 보조받는 보조사업자", isCorrect: false }
+                ],
+                rationale: "공공조달의 수요기관은 국가재정법상 국가기관, 지방자치단체, 공공기관뿐만 아니라 공적 자금을 지원받아 보조사업을 수행하는 민간기관/개인까지 포함되나, 공적 재정이 전혀 개입되지 않는 순수 민간기업은 제외됩니다."
+            },
+            {
+                question: "Q10. 공공조달의 업무 수행 6단계 절차의 순서가 올바르게 나열된 것은?",
+                options: [
+                    { text: "조달계획 수립 -> 조달 실행 -> 계약관리 -> 공급자 평가 -> 계약 완료 -> 피드백", isCorrect: false },
+                    { text: "조달계획 수립 -> 조달 실행 -> 계약관리 -> 계약 완료 -> 공급자 평가 -> 피드백", isCorrect: true },
+                    { text: "조달 실행 -> 조달계획 수립 -> 계약관리 -> 계약 완료 -> 피드백 -> 공급자 평가", isCorrect: false },
+                    { text: "조달계획 수립 -> 계약관리 -> 조달 실행 -> 계약 완료 -> 공급자 평가 -> 피드백", isCorrect: false }
+                ],
+                rationale: "공공조달의 업무 수행 범위는 '조달계획 수립 -> 조달 실행 -> 계약관리 -> 계약 완료 -> 공급자 평가 -> 피드백'의 6단계를 거칩니다."
+            },
+            {
+                question: "Q11. 공공조달의 3대 기본 분류에 속하는 조달 대상물이 아닌 것은?",
+                options: [
+                    { text: "물품(Goods)", isCorrect: false },
+                    { text: "용역(Services)", isCorrect: false },
+                    { text: "공사(Works)", isCorrect: false },
+                    { text: "양허권(Concession)", isCorrect: true }
+                ],
+                rationale: "공공조달의 3대 기본 조달 대상물은 물품, 용역, 공사입니다. 양허권 및 공익산업 서비스(Utilities) 등은 추가 분류에 해당합니다."
+            },
+            {
+                question: "Q12. 다음 중 물품, 용역, 공사의 특성 비교로 적절하지 않은 것은?",
+                options: [
+                    { text: "물품 - 물리적 유형성을 지니며 소유 및 저장이 가능하다.", isCorrect: false },
+                    { text: "용역 - 정신적 무형성을 지니며 주로 협상에 의한 계약 기준을 적용한다.", isCorrect: false },
+                    { text: "공사 - 설계, 시공방법, 적용기술, 공정관리 등이 중요하며 종합심사낙찰제를 활용한다.", isCorrect: false },
+                    { text: "공사 - 물품과 달리 하도급 제한 규정이 전혀 존재하지 않는다.", isCorrect: true }
+                ],
+                rationale: "건설공사는 건설산업기본법 등에 따라 부실시공 방지를 위해 엄격한 하도급 제한 규정을 적용받습니다."
+            },
+            {
+                question: "Q13. 국제조달시장에서 지식, 기술, 경험이 결합된 전문가의 맞춤형 접근방법론이 투입되는 용역을 뜻하는 용어는?",
+                options: [
+                    { text: "비컨설팅 서비스 (Non-consulting Service)", isCorrect: false },
+                    { text: "컨설팅 서비스 (Consulting Service)", isCorrect: true },
+                    { text: "양허권 서비스 (Concession Service)", isCorrect: false },
+                    { text: "단순 노무 용역 (Labor Service)", isCorrect: false }
+                ],
+                rationale: "전문가적 지식과 기획력이 수반되는 용역을 '컨설팅 서비스'라고 하며, 단순 물리적 활동이나 표준화된 기법으로 수행하는 일상적 용역을 '비컨설팅 서비스'라고 합니다."
+            },
+            {
+                question: "Q14. 다음 중 경쟁적 조달방법에 대한 설명으로 옳은 것은?",
+                options: [
+                    { text: "특정 공급업체를 조달기관이 직접 임의 선택하여 신속하게 계약하는 방법이다.", isCorrect: false },
+                    { text: "정보가 투명하게 공개되어 참가 기회가 확대되고 경쟁성이 강화된다.", isCorrect: true },
+                    { text: "수의계약과 완전히 동일한 의미의 조달방법이다.", isCorrect: false },
+                    { text: "문서 준비 등 행정적 부담이 전혀 없고 계약 기간이 매우 짧다.", isCorrect: false }
+                ],
+                rationale: "경쟁적 조달은 공개입찰을 통해 공정성과 투명성을 극대화하는 반면, 표준 절차 준수로 인해 준비 시간과 행정적 부담이 다소 늘어날 수 있다는 특징이 있습니다."
+            },
+            {
+                question: "Q15. 비경쟁적 조달방법(수의계약 등)의 장점과 거리가 먼 것은?",
+                options: [
+                    { text: "절차의 간소화", isCorrect: false },
+                    { text: "신속한 계약 체결", isCorrect: false },
+                    { text: "공정성 및 투명성 극대화", isCorrect: true },
+                    { text: "긴급 재난 시 신속한 구호 물자 확보", isCorrect: false }
+                ],
+                rationale: "비경쟁적 조달방법(수의계약)은 절차가 빠르고 간편하다는 장점이 있으나, 경쟁이 제한되어 공정성 및 투명성이 저하될 우려가 크다는 단점이 있습니다."
+            },
+            {
+                question: "Q16. 다음 중 직접조달(Direct Procurement) 방법에서 공급요건을 충족하는 업체가 시장에 단 하나만 존재하는 경우를 뜻하는 용어는?",
+                options: [
+                    { text: "단일공급원 (Single Source)", isCorrect: false },
+                    { text: "단독공급원 (Sole Source)", isCorrect: true },
+                    { text: "공동수급체 (Consortium)", isCorrect: false },
+                    { text: "다수공급자 (Multiple Source)", isCorrect: false }
+                ],
+                rationale: "조달 대상물을 공급할 수 있는 유일한 업체만 존재하는 경우를 '단독공급원(Sole Source)'이라 하고, 여러 업체가 존재하지만 전략적 협력 등을 이유로 1개 업체를 선택하는 것을 '단일공급원(Single Source)'이라고 합니다."
+            },
+            {
+                question: "Q17. 다음 중 수의계약(직접조달)을 적용하기에 가장 부적절한 상황은?",
+                options: [
+                    { text: "천재지변으로 긴급 방역 사업을 추진하는 경우", isCorrect: false },
+                    { text: "지식재산권, 특허 등 배타적 권리로 인해 특정 업체 자재를 반드시 사용해야 하는 경우", isCorrect: false },
+                    { text: "신속한 예산 소모를 위해 경쟁입찰 절차를 고의로 회피하려는 경우", isCorrect: true },
+                    { text: "추가 공급 업체를 파악하기 위한 조치를 취했으나 적합한 대체자가 없는 경우", isCorrect: false }
+                ],
+                rationale: "고의적인 입찰 회피나 편의적 목적의 수의계약은 법적 정당성이 인정되지 않으며 엄격히 제한됩니다."
+            },
+            {
+                question: "Q18. 다음 중 경쟁입찰의 성립 조건으로 공공계약법령상 명시된 기준은?",
+                options: [
+                    { text: "단 1인의 입찰참가 신청만 있어도 유효하게 성립한다.", isCorrect: false },
+                    { text: "2인 이상의 유효한 입찰이 있어야 성립한다.", isCorrect: true },
+                    { text: "대기업과 중소기업이 최소 1개씩 참여해야 성립한다.", isCorrect: false },
+                    { text: "가격 평가 점수가 만점인 입찰자가 있어야 성립한다.", isCorrect: false }
+                ],
+                rationale: "국가계약법 및 지방계약법상 경쟁입찰은 '2인 이상의 유효한 입찰'로 성립합니다."
+            },
+            {
+                question: "Q19. 공공조달 원칙 중 '입찰공고, 평가기준, 낙찰결과 등 전 과정을 대중과 참가자에게 공개함으로써 부정을 방지하는 것'을 지칭하는 용어는?",
+                options: [
+                    { text: "효율성 (Efficiency)", isCorrect: false },
+                    { text: "투명성 (Transparency)", isCorrect: true },
+                    { text: "상호성 (Reciprocity)", isCorrect: false },
+                    { text: "적격성 (Qualification)", isCorrect: false }
+                ],
+                rationale: "정보를 개방하고 공유함으로써 감시를 원활하게 하는 것은 '투명성'의 원칙입니다."
+            },
+            {
+                question: "Q20. 다음 중 공공조달 인력의 전문성 향상 및 자격 제도의 필요성에 대한 설명으로 옳지 않은 것은?",
+                options: [
+                    { text: "복잡해지는 조달 규칙으로 인한 법적 분쟁과 오류를 최소화하기 위함이다.", isCorrect: false },
+                    { text: "공공조달이 단순 주문 기능을 넘어 전략적 도구로 고도화됨에 따른 전문 역량이 요구된다.", isCorrect: false },
+                    { text: "조달청은 공공조달역량개발원을 통해 다양한 교육 프로그램을 운영하고 있다.", isCorrect: false },
+                    { text: "조달공무원이나 기업 조달담당자는 전문지식이 없어도 표준 시스템(나라장터)이 모든 판단을 자동으로 수행하므로 전문성이 필요 없다.", isCorrect: true }
+                ],
+                rationale: "나라장터 등 전자조달시스템은 도구일 뿐, 시장분석, 규격검토, 적법성 판단 등을 위해 담당자의 고도의 전문적 조달 역량이 필수적입니다."
+            },
+            {
+                question: "Q21. 대한민국 조달청이 운영하는 범정부 국가종합전자조달시스템의 명칭은?",
+                options: [
+                    { text: "국방장터 (D2B)", isCorrect: false },
+                    { text: "학교장터 (S2B)", isCorrect: false },
+                    { text: "나라장터 (KONEPS / G2B)", isCorrect: true },
+                    { text: "공공급식 통합플랫폼 (NeAT)", isCorrect: false }
+                ],
+                rationale: "대한민국 범정부 국가종합전자조달시스템의 공식 명칭은 '나라장터'입니다."
+            },
+            {
+                question: "Q22. 다음 중 부문별 전문화된 전자조달시스템과 운영 기관이 바르게 연결되지 않은 것은?",
+                options: [
+                    { text: "국방부문 - 방위사업청 (국방장터, D2B)", isCorrect: false },
+                    { text: "교육부문 - 한국교직원공제회 (학교장터, S2B)", isCorrect: false },
+                    { text: "공공급식식재료 - 한국농수산식품유통공사 (NeAT)", isCorrect: false },
+                    { text: "우수조달제품 - 중소벤처기업진흥공단 (중소장터)", isCorrect: true }
+                ],
+                rationale: "우수조달제품 등록 및 관리는 조달청이 직접 담당하며, 별도의 '중소장터'라는 유관 전담 시스템을 중진공에서 중앙조달 용도로 총괄 운영하는 체계는 아닙니다."
+            },
+            {
+                question: "Q23. 다음 중 전자조달시스템(나라장터) 도입에 따른 효과로 가장 거리가 먼 것은?",
+                options: [
+                    { text: "조달 전 과정의 온라인 처리로 거래 비용 대폭 절감", isCorrect: false },
+                    { text: "공공기관 방문 최소화로 행정 비효율 해소", isCorrect: false },
+                    { text: "입찰담합이나 불공정 행위의 원천적 기술적 추적 차단", isCorrect: true },
+                    { text: "조달 정보의 실시간 공개를 통한 투명성 제고", isCorrect: false }
+                ],
+                rationale: "전자조달 도입은 투명성을 높이고 담합을 모니터링(예: 입찰담합 징후 분석 시스템 운영)하는 데 기여하지만, 불공정 행위를 기술적으로 '원천 차단'할 수는 없으며 사후 분석 및 감시에 유용합니다."
+            },
+            {
+                question: "Q24. 국가종합전자조달시스템(나라장터)의 주요 연계 시스템 중 국가 표준 물품분류체계를 유지하고 조달 물품의 효율적 식별을 돕는 시스템은?",
+                options: [
+                    { text: "목록정보시스템", isCorrect: true },
+                    { text: "입찰참가자격 등록시스템", isCorrect: false },
+                    { text: "하도급지킴이 시스템", isCorrect: false },
+                    { text: "e-발주시스템", isCorrect: false }
+                ],
+                rationale: "국가 표준 물품분류를 관리하고 조달 물품의 코드화 및 정보 관리를 전담하는 곳은 '목록정보시스템'입니다."
+            },
+            {
+                question: "Q25. 전자조달시스템을 이용한 입찰참가등록제도에 대한 설명으로 적절하지 않은 것은?",
+                options: [
+                    { text: "한 번의 등록으로 모든 공공기관 입찰에 참가할 수 있는 One-Stop 서비스가 구현되어 있다.", isCorrect: false },
+                    { text: "입찰 대행인의 무분별한 중복 등록을 원천 방지하기 위해 지문인식 등 보안 토큰이 활용된다.", isCorrect: false },
+                    { text: "외국 기업의 경우 어떠한 경우에도 국내 전자조달시스템 입찰참가등록을 할 수 없다.", isCorrect: true },
+                    { text: "허위 정보를 등록하여 입찰에 참가하는 경우 부정당업자 제재 등의 처분을 받을 수 있다.", isCorrect: false }
+                ],
+                rationale: "정부조달협정(GPA) 가입국 등의 외국 기업도 소정의 자격 등록 절차를 거치면 국내 입찰 및 나라장터 시스템을 통해 정상 참여할 수 있습니다."
+            }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let answered = false;
+
+        document.getElementById('start-btn').addEventListener('click', function() {
+            startQuiz();
+        });
+
+        function startQuiz() {
+            currentIndex = 0;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            secondsElapsed = 0;
+            
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            document.getElementById('stats-badge').classList.remove('hidden');
+            document.getElementById('stats-badge').classList.add('flex');
+
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                let min = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                let sec = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('timer').innerText = `${min}:${sec}`;
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const q = questions[currentIndex];
+            
+            document.getElementById('question-tracker').innerText = `Question ${currentIndex + 1} of ${questions.length}`;
+            document.getElementById('score-tracker').innerText = `점수: ${score}`;
+            document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+            document.getElementById('question-text').innerText = q.question;
+            
+            document.getElementById('rationale-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = "w-full text-left p-4 rounded-2xl border-2 border-gray-100 bg-gray-50/50 hover:bg-indigo-50/30 hover:border-indigo-200 font-medium transition-all flex items-center justify-between group cursor-pointer";
+                btn.innerHTML = `
+                    <span class="flex items-center space-x-3">
+                        <span class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:border-indigo-400 group-hover:text-indigo-600">${['①', '②', '③', '④'][idx]}</span>
+                        <span class="text-gray-800 text-sm md:text-base leading-relaxed">${opt.text}</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-indigo-500 ml-2"></i>
+                `;
+                btn.onclick = () => selectOption(idx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex, selectedBtn) {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentIndex];
+            const options = q.options;
+            const buttons = document.getElementById('options-container').children;
+
+            options.forEach((opt, idx) => {
+                const btn = buttons[idx];
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-indigo-50/30', 'hover:border-indigo-200');
+                
+                if (opt.isCorrect) {
+                    btn.classList.remove('border-gray-100', 'bg-gray-50/50');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50/60', 'text-emerald-950');
+                    btn.querySelector('span span:first-child').className = "w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-bold";
+                } else if (idx === selectedIndex) {
+                    btn.classList.remove('border-gray-100', 'bg-gray-50/50');
+                    btn.classList.add('border-rose-500', 'bg-rose-50/60', 'text-rose-950');
+                    btn.querySelector('span span:first-child').className = "w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-bold";
+                } else {
+                    btn.style.opacity = "0.4";
+                }
+            });
+
+            const selectedOption = options[selectedIndex];
+            const rationaleBox = document.getElementById('rationale-box');
+            const rationaleTitle = document.getElementById('rationale-title');
+            const rationaleText = document.getElementById('rationale-text');
+            const rationaleIcon = document.getElementById('rationale-icon');
+
+            if (selectedOption.isCorrect) {
+                score += 4;
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                
+                rationaleBox.className = "mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200";
+                rationaleIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i>';
+                rationaleTitle.className = "font-bold text-sm mb-1 text-emerald-900";
+                rationaleTitle.innerText = "정답입니다!";
+            } else {
+                streak = 0;
+                rationaleBox.className = "mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200";
+                rationaleIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600"></i>';
+                rationaleTitle.className = "font-bold text-sm mb-1 text-rose-900";
+                rationaleTitle.innerText = "오답입니다!";
+            }
+
+            rationaleText.innerText = q.rationale;
+            rationaleBox.classList.remove('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.getElementById('score-tracker').innerText = `점수: ${score}`;
+        }
+
+        document.getElementById('next-btn').addEventListener('click', function() {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion();
+            } else {
+                endQuiz();
+            }
+        });
+
+        function endQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('stats-badge').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            document.getElementById('final-score').innerHTML = `${score}<span class="text-2xl text-indigo-400">점</span>`;
+            
+            let msg = "완벽해요! 아주 훌륭한 실력입니다.";
+            if (score < 60) msg = "기본 개념과 원칙을 한 번 더 복습해보세요!";
+            else if (score < 90) msg = "좋은 성적입니다! 조금만 더 정리하면 만점입니다.";
+            document.getElementById('result-message').innerText = msg;
+
+            let min = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            let sec = String(secondsElapsed % 60).padStart(2, '0');
+            document.getElementById('final-time').innerText = `${min}:${sec}`;
+            document.getElementById('final-streak').innerText = maxStreak;
+
+            if (score === 100) {
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function restartQuiz() {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
+        }
+
+        function shareResult() {
+            const text = `공공조달관리사 1회차 모의고사 결과: 100점 만점에 ${score}점 기록!`;
+            if (navigator.share) {
+                navigator.share({
+                    title: '공공조달관리사 1회차 결과',
+                    text: text,
+                    url: window.location.href,
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('결과가 클립보드에 복사되었습니다!');
+                }).catch(() => {
+                    alert(text);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
